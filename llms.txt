@@ -1,0 +1,18 @@
+# Joseph Solomon — GitHub Projects
+
+> Project Manager building Claude Code tools and Python analytics. Open-source projects covering LLM agent tooling, Outlook automation, ETF momentum research, SEO tooling, and LLM resume screening. Contact: joseph@kainosis.com — GitHub: https://github.com/ChiefStarKid
+
+## Claude Code skills & LLM agent tooling
+
+- [new-thread](https://github.com/ChiefStarKid/new-thread): A Claude Code skill for handing off a task to a fresh parallel session without losing focus in the current one. Live demo: https://chiefstarkid.github.io/new-thread/
+- [claude-outlook-bridge](https://github.com/ChiefStarKid/claude-outlook-bridge): A single-file Python bridge that lets Claude Code and other LLM agents read and send Outlook email on Windows via COM automation — no OAuth, no Microsoft Graph, no cloud intermediary or MCP server.
+- [link-pitch](https://github.com/ChiefStarKid/link-pitch): A Claude Code skill for strategic SEO link insertion and editorial outreach — earning backlinks by pitching editors rather than scraping directories.
+
+## ETF momentum & options research
+
+- [roaring-trade-portfolio-rotation](https://github.com/ChiefStarKid/roaring-trade-portfolio-rotation): An M-Signal-driven sector ETF rotation backtest measured against SPY buy-and-hold across the full space of exit timing and allocation splits. Live demo: https://chiefstarkid.github.io/roaring-trade-portfolio-rotation/
+- [etf-momentum-analytics](https://github.com/ChiefStarKid/etf-momentum-analytics): A systematic backtest testing whether the rate of change in weekly ETF momentum scores reveals buying or selling exhaustion before price confirms it — for put credit spread and directional sector ETF traders.
+
+## Hiring & resume screening
+
+- [resume-assessor](https://github.com/ChiefStarKid/resume-assessor): A five-stage LLM screening pipeline that reads a resume against a job description the way a sceptical Talent Consultant would — adversarially first, then charitably, then strategically. Goes beyond keyword matching.
