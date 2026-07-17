@@ -47,7 +47,7 @@
           "name": "Do I need an MCP server to connect an LLM agent to a desktop app?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Not always. If your agent (such as Claude Code) can already run shell commands, a thin bridge — a small script the agent calls that returns structured JSON — often does the job with far less setup. An MCP server is worth the extra work when you want a reusable, typed tool that many agents or teammates share, or richer capability negotiation."
+            "text": "Not always. If your agent (such as Claude Code) can already run shell commands, a thin bridge, meaning a small script the agent calls that returns structured JSON, often does the job with far less setup. An MCP server is worth the extra work when you want a reusable, typed tool that many agents or teammates share, or richer capability negotiation."
           }
         },
         {
@@ -63,7 +63,7 @@
           "name": "When is a direct bridge the better choice?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "A direct bridge is better for a local assistant on your own machine, a single agent, and a narrow task where the app is already open — for example letting Claude drive Outlook Desktop on Windows. It trades portability and formal tool-typing for near-zero setup."
+            "text": "A direct bridge is better for a local assistant on your own machine, a single agent, and a narrow task where the app is already open, such as letting Claude drive Outlook Desktop on Windows. It trades portability and formal tool-typing for near-zero setup."
           }
         }
       ]
@@ -113,8 +113,8 @@
 <p class="meta">A practical comparison · updated 2026-07-15</p>
 
 <p>
-You want an LLM agent — Claude Code, say — to drive a local desktop application: read your email, control an
-app, query something on your own machine. The reflex answer in 2026 is "build an MCP server." Sometimes that's
+You want an LLM agent, Claude Code say, to drive a local desktop application: read your email, control an app,
+query something on your own machine. The reflex answer in 2026 is "build an MCP server." Sometimes that's
 right. Often it's more machinery than the job needs. This is a practical guide to choosing, with a real Windows
 Outlook example to make it concrete.
 </p>
@@ -122,29 +122,30 @@ Outlook example to make it concrete.
 <h2 id="definitions">Two ways to give an agent a new capability</h2>
 <p><strong>An MCP server</strong> is a running process that exposes <em>typed tools</em> over the Model Context
 Protocol. Any MCP-aware client can discover those tools and call them. It's the portable, reusable, "proper"
-integration — and it comes with real setup: a server to write, run, and keep alive; a protocol to speak; a
+integration, and it comes with real setup: a server to write and keep alive, a protocol to speak, and a
 lifecycle to manage.</p>
 <p><strong>A direct bridge</strong> is a plain command-line program the agent invokes and reads the output of.
-If your agent can already shell out — Claude Code can — then a small script that takes a command and returns
-<strong>structured JSON</strong> is enough for the agent to use it. No server, no protocol, no daemon.</p>
+If your agent can already shell out, and Claude Code can, then a small script that takes a command and returns
+<strong>structured JSON</strong> is enough for the agent to use it. There's no server and no daemon to run.</p>
 
 <h2 id="compare">Side by side</h2>
 <table>
   <thead><tr><th></th><th>MCP server</th><th>Direct bridge (script)</th></tr></thead>
   <tbody>
-    <tr><td><strong>Setup cost</strong></td><td>Higher — write, host, and run a server.</td><td>Low — a single script plus a permission to run it.</td></tr>
-    <tr><td><strong>Reusability</strong></td><td>High — any MCP client, any teammate.</td><td>Local — tied to an agent that can run commands.</td></tr>
-    <tr><td><strong>Tool typing / discovery</strong></td><td>Formal, typed, self-describing.</td><td>Informal — the agent reads JSON output.</td></tr>
-    <tr><td><strong>Best when</strong></td><td>Shared, long-lived, multi-agent, or cross-machine.</td><td>Local assistant, one agent, narrow task, app already open.</td></tr>
-    <tr><td><strong>Ongoing maintenance</strong></td><td>A process to keep running and updated.</td><td>Effectively none — it runs when called.</td></tr>
+    <tr><td><strong>Setup cost</strong></td><td>Higher. You write the server, then keep it running.</td><td>Low. A single script plus a permission to run it.</td></tr>
+    <tr><td><strong>Reusability</strong></td><td>High. Any MCP client, any teammate.</td><td>Local. Tied to an agent that can run commands.</td></tr>
+    <tr><td><strong>Tool typing / discovery</strong></td><td>Formal, typed, self-describing.</td><td>Informal. The agent reads JSON output.</td></tr>
+    <tr><td><strong>Best when</strong></td><td>Shared, long-lived, multi-agent, or cross-machine.</td><td>A local assistant on one machine, where the app is already open.</td></tr>
+    <tr><td><strong>Ongoing maintenance</strong></td><td>A process to keep running and updated.</td><td>Effectively none. It runs when called.</td></tr>
   </tbody>
 </table>
 
 <h2 id="example">A concrete example: driving Outlook on Windows</h2>
 <p>
-Take a real case — letting Claude read and send Outlook email on your own Windows PC. You could build an MCP
-server around Microsoft Graph: an Azure app registration, OAuth, token refresh, a hosted process. Portable and
-powerful — and heavy for a tool you'll only ever use on the machine where Outlook is already open.
+Take a real case: letting Claude read and send Outlook email on your own Windows PC. You could build an MCP
+server around Microsoft Graph. That means an Azure app registration and an OAuth flow with token refresh,
+plus somewhere to host the process. It's portable and powerful, but heavy for a tool you'll only ever use on
+the machine where Outlook is already open.
 </p>
 <p>
 The bridge approach skips all of it. <a href="https://github.com/ChiefStarKid/claude-outlook-bridge">claude-outlook-bridge</a>
@@ -161,7 +162,7 @@ your Outlook email on Windows</a>.
 </p>
 <blockquote>
 The point isn't that bridges beat MCP servers. It's that the "app is already open on my machine" case is exactly
-where a bridge's simplicity wins — and that case is more common than the reflex "build a server" suggests.
+where a bridge's simplicity wins, and that case is more common than the reflex "build a server" suggests.
 </blockquote>
 
 <h2 id="checklist">A quick decision checklist</h2>
@@ -186,10 +187,10 @@ with far less setup. Choose an MCP server when you want a reusable, typed tool s
 
 <h3>What's the difference between an MCP server and a bridge script?</h3>
 <p>An MCP server is a running process exposing typed tools over a protocol, reusable across clients. A bridge is a
-command-line program the agent invokes directly and reads the output of — simpler, but local and informal.</p>
+command-line program the agent invokes directly and reads the output of. It's simpler, but local and informal.</p>
 
 <h3>When is a direct bridge the better choice?</h3>
-<p>For a local assistant, a single agent, and a narrow task where the app is already open — for example driving
+<p>For a local assistant, a single agent, and a narrow task where the app is already open, such as driving
 Outlook Desktop on Windows. It trades portability for near-zero setup.</p>
 
 <footer>
