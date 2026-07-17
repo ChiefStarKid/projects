@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How to Let Claude Read &amp; Send Outlook Email on Windows (No Graph API)</title>
+<meta name="description" content="A step-by-step guide to connecting Claude Code to Outlook Desktop on Windows using a Python COM bridge — no Azure app, no OAuth, no Microsoft Graph. Read inboxes, draft replies, and check your calendar from inside a Claude conversation.">
+<link rel="canonical" href="https://chiefstarkid.github.io/projects/claude-outlook-email-windows/">
+
+<!-- Open Graph -->
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://chiefstarkid.github.io/projects/claude-outlook-email-windows/">
+<meta property="og:title" content="How to Let Claude Read &amp; Send Outlook Email on Windows (No Graph API)">
+<meta property="og:description" content="Connect Claude Code to Outlook Desktop on Windows with a single-file Python COM bridge — no OAuth, no Microsoft Graph, no cloud.">
+<meta property="og:site_name" content="Joseph Solomon — Projects">
+
+<!-- Twitter card -->
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="How to Let Claude Read &amp; Send Outlook Email on Windows (No Graph API)">
+<meta name="twitter:description" content="Connect Claude Code to Outlook Desktop on Windows with a single-file Python COM bridge — no OAuth, no Microsoft Graph, no cloud.">
+
+<!-- Structured data: HowTo + FAQ + breadcrumb, authored by the site entity -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "HowTo",
+      "name": "Connect Claude Code to Outlook email on Windows without the Graph API",
+      "description": "Install a single-file Python COM bridge so Claude Code can read and send Outlook Desktop email on Windows, using your already signed-in Outlook session instead of OAuth or Microsoft Graph.",
+      "totalTime": "PT10M",
+      "author": {
+        "@type": "Person",
+        "name": "Joseph Solomon",
+        "url": "https://chiefstarkid.github.io/projects/",
+        "sameAs": [
+          "https://github.com/ChiefStarKid",
+          "https://www.linkedin.com/in/joseph-solomon-%E6%88%B4%E4%BC%81%E5%BA%86-376156160/"
+        ]
+      },
+      "supply": [
+        { "@type": "HowToSupply", "name": "Windows 10 or 11 PC" },
+        { "@type": "HowToSupply", "name": "Classic Outlook Desktop App, signed in" },
+        { "@type": "HowToSupply", "name": "Python 3.9 or later" }
+      ],
+      "tool": [
+        { "@type": "HowToTool", "name": "claude-outlook-bridge (Python)" },
+        { "@type": "HowToTool", "name": "pywin32" }
+      ],
+      "step": [
+        {
+          "@type": "HowToStep",
+          "name": "Clone the bridge and install dependencies",
+          "text": "Clone the claude-outlook-bridge repository, then install its one dependency, pywin32, with pip.",
+          "url": "https://chiefstarkid.github.io/projects/claude-outlook-email-windows/#install"
+        },
+        {
+          "@type": "HowToStep",
+          "name": "Smoke-test against your inbox",
+          "text": "Run the bridge's list command with --pretty to confirm it can read your signed-in Outlook inbox.",
+          "url": "https://chiefstarkid.github.io/projects/claude-outlook-email-windows/#install"
+        },
+        {
+          "@type": "HowToStep",
+          "name": "Grant Claude Code scoped permission",
+          "text": "Add a scoped Bash permission to your project's .claude/settings.json so Claude Code can invoke only the bridge script.",
+          "url": "https://chiefstarkid.github.io/projects/claude-outlook-email-windows/#permissions"
+        }
+      ]
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Can Claude read my Outlook email without OAuth or the Microsoft Graph API?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes, on Windows. The claude-outlook-bridge drives the classic Outlook Desktop App through Windows COM automation, so it inherits your already signed-in Outlook session. There is no Azure app registration, no OAuth flow, and no cloud intermediary."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Is it safe to let an AI agent send email from my account?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "The bridge is draft-by-default: the send, reply, and forward commands save to your Drafts folder unless you explicitly pass --confirm-send. Nothing leaves your outbox until you approve it, and Claude Code's scoped permission limits it to running only the bridge script."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Does this work with the new Outlook, Outlook on the web, or Mac Outlook?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "No. It requires the classic Outlook Desktop App on Windows 10 or 11, because it uses Windows COM automation. The new Outlook wrapper, Outlook on the web (OWA), and Mac Outlook are not supported. For cross-platform or headless setups, use the Microsoft Graph API instead."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "When should I use the Microsoft Graph API instead of this bridge?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Use Microsoft Graph when you need server-side, headless, or cross-platform automation, or when Outlook is not running on the machine. The COM bridge is for a local AI assistant on your own Windows PC where Outlook is already open — it trades portability for zero authentication setup."
+          }
+        }
+      ]
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "Projects", "item": "https://chiefstarkid.github.io/projects/" },
+        { "@type": "ListItem", "position": 2, "name": "Claude + Outlook on Windows", "item": "https://chiefstarkid.github.io/projects/claude-outlook-email-windows/" }
+      ]
+    }
+  ]
+}
+</script>
+
+<style>
+  :root { color-scheme: light dark; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 2.5rem 1.5rem 4rem;
+    line-height: 1.65;
+    color: #1a1a1a;
+    background: #fff;
+  }
+  @media (prefers-color-scheme: dark) {
+    body { color: #e5e5e5; background: #0d1117; }
+    a { color: #58a6ff; }
+    code, pre { background: #161b22; }
+    pre { border-color: #30363d; }
+    table { border-color: #30363d; }
+    th, td { border-color: #30363d; }
+    thead { background: #161b22; }
+    blockquote { border-color: #30363d; color: #b0b0b0; }
+    .crumbs, .meta { color: #8b949e; }
+  }
+  .crumbs { font-size: 0.85rem; color: #666; margin-bottom: 1.5rem; }
+  h1 { font-size: 1.7rem; line-height: 1.25; margin-bottom: 0.4rem; }
+  .meta { color: #666; font-size: 0.9rem; margin-top: 0; }
+  h2 { font-size: 1.25rem; margin-top: 2.4rem; border-bottom: 1px solid #d0d7de; padding-bottom: 0.3rem; }
+  h3 { font-size: 1.05rem; margin-top: 1.6rem; }
+  code {
+    background: #f0f2f4; padding: 0.1rem 0.35rem; border-radius: 4px;
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace; font-size: 0.9em;
+  }
+  pre {
+    background: #f6f8fa; border: 1px solid #d0d7de; border-radius: 8px;
+    padding: 0.9rem 1rem; overflow-x: auto; font-size: 0.86rem; line-height: 1.5;
+  }
+  pre code { background: none; padding: 0; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.92rem; display: block; overflow-x: auto; }
+  th, td { border: 1px solid #d0d7de; padding: 0.5rem 0.7rem; text-align: left; vertical-align: top; }
+  thead { background: #f6f8fa; }
+  blockquote {
+    border-left: 3px solid #d0d7de; margin: 1.2rem 0; padding: 0.2rem 0 0.2rem 1rem; color: #555;
+  }
+  footer { margin-top: 3rem; font-size: 0.9rem; color: #666; border-top: 1px solid #d0d7de; padding-top: 1rem; }
+</style>
+</head>
+<body>
+
+<nav class="crumbs"><a href="https://chiefstarkid.github.io/projects/">← Joseph Solomon — Projects</a></nav>
+
+<h1>How to let Claude read and send your Outlook email on Windows — without the Graph API</h1>
+<p class="meta">A practical guide · updated 2026-07-15</p>
+
+<p>
+If you want <strong>Claude Code</strong> to read your inbox, draft replies, chase actions, and check your
+calendar — but you <em>don't</em> want to register an Azure app, wire up OAuth, or route your mail through a
+cloud API — there's a much shorter path on Windows. This guide shows you how to connect Claude to the
+<strong>Outlook Desktop App</strong> using a single-file Python bridge that reuses the Outlook session you're
+<em>already</em> signed into. Setup is about ten minutes and the only dependency is <code>pywin32</code>.
+</p>
+
+<h2 id="why">Why not just use the Microsoft Graph API?</h2>
+<p>
+Graph is the "correct" answer for cross-platform, server-side, or headless automation — but for a personal
+AI assistant on your own machine it's a lot of ceremony: an Azure app registration, delegated permissions, an
+OAuth consent flow, and token refresh handling, all before Claude can read a single email. If Outlook is
+<em>already open in front of you</em>, all of that is redundant. You're signed in; the mailbox is right there.
+</p>
+<p>
+The bridge takes the other route. It drives the classic Outlook Desktop App through <strong>Windows COM
+automation</strong> — the same interface Outlook macros use — so it simply inherits your logged-in session.
+No credentials, no cloud, no token to leak.
+</p>
+
+<table>
+  <thead><tr><th>Approach</th><th>Auth setup</th><th>Platform</th><th>Best for</th></tr></thead>
+  <tbody>
+    <tr><td><strong>COM bridge (this guide)</strong></td><td>None — uses signed-in Outlook</td><td>Windows + classic Outlook</td><td>Local AI assistant on your own PC. Zero config beyond a pip install.</td></tr>
+    <tr><td>Microsoft Graph API</td><td>Azure app + OAuth</td><td>Any</td><td>Server-side, cross-platform, headless automation.</td></tr>
+    <tr><td>Outlook Add-in (Office JS)</td><td>Side-load or Store deploy</td><td>Anywhere Outlook runs</td><td>Extending the Outlook UI, not driving it from outside.</td></tr>
+    <tr><td>Generic email MCP server</td><td>Varies (IMAP/OAuth)</td><td>Any</td><td>Multi-mailbox or non-Outlook accounts.</td></tr>
+  </tbody>
+</table>
+
+<h2 id="prereqs">What you need before you start</h2>
+<ul>
+  <li><strong>Windows 10 or 11</strong> — COM automation is Windows-only.</li>
+  <li><strong>The classic Outlook Desktop App</strong>, signed in and running. This does <em>not</em> work with
+  the new Outlook wrapper, Outlook on the web (OWA), or Mac Outlook.</li>
+  <li><strong>Python 3.9 or later</strong>.</li>
+</ul>
+
+<h2 id="install">How to install the bridge (about 10 minutes)</h2>
+<p>Clone the repository and install its single dependency:</p>
+<pre><code>git clone https://github.com/ChiefStarKid/claude-outlook-bridge.git
+cd claude-outlook-bridge
+pip install -r requirements.txt</code></pre>
+
+<p>Now smoke-test it against your own inbox. With Outlook open and signed in, run:</p>
+<pre><code>python outlook_bridge.py list --pretty</code></pre>
+
+<p>
+If you see a JSON list of your recent messages, the bridge is talking to Outlook. Every command outputs JSON
+by default — add <code>--pretty</code> anywhere for human-readable formatting. Place <code>outlook_bridge.py</code>
+wherever you'd like to call it from; if you're using Claude Code, <code>~/.claude/</code> is a natural home.
+</p>
+
+<h2 id="permissions">How to let Claude Code actually use it</h2>
+<p>
+Claude invokes the bridge with a single shell call — <code>python /path/to/outlook_bridge.py [command]</code> —
+so you just need to permit that one command. Add a <strong>scoped</strong> permission to your project's
+<code>.claude/settings.json</code>:
+</p>
+<pre><code>{
+  "permissions": {
+    "allow": ["Bash(python *outlook_bridge.py*:*)"]
+  }
+}</code></pre>
+<p>
+This lets Claude run the bridge <em>and nothing else</em> — no other Bash commands get auto-approved. Because
+it lives in a project's <code>.claude/settings.json</code>, the permission only applies inside that project;
+delete the line whenever you want to revoke Claude's email access.
+</p>
+
+<h2 id="commands">What can Claude do with your Outlook once it's wired up?</h2>
+<p>The bridge exposes the full email lifecycle as simple commands:</p>
+<table>
+  <thead><tr><th>Command</th><th>What it does</th></tr></thead>
+  <tbody>
+    <tr><td><code>folders</code></td><td>List all mail folders.</td></tr>
+    <tr><td><code>list</code></td><td>List recent messages in a folder.</td></tr>
+    <tr><td><code>search</code></td><td>Search across your mailbox.</td></tr>
+    <tr><td><code>read</code> / <code>open</code></td><td>Read a specific message or thread.</td></tr>
+    <tr><td><code>send</code> / <code>reply</code> / <code>forward</code></td><td>Compose, reply, reply-all, or forward with a note.</td></tr>
+    <tr><td><code>move</code> / <code>delete</code></td><td>File a message into a folder, or remove it.</td></tr>
+    <tr><td><code>cal-list</code></td><td>Query your calendar.</td></tr>
+  </tbody>
+</table>
+<p>
+In practice that means Claude can read a thread for context, draft a reply in your voice, chase an outstanding
+action, file the message, and tell you what's next on your calendar — all inside one conversation, without you
+switching to Outlook.
+</p>
+
+<h2 id="safety">Is it safe to let an AI send email?</h2>
+<p>
+The bridge is <strong>draft-by-default</strong>. The <code>send</code>, <code>reply</code>, and
+<code>forward</code> commands all save to your <strong>Drafts</strong> folder unless you explicitly add
+<code>--confirm-send</code>. So Claude can compose freely, but nothing actually leaves your outbox until you've
+read the draft and approved it. Combined with the scoped permission above — Claude can run <em>only</em> the
+bridge script — you keep a human checkpoint on every outbound message.
+</p>
+<blockquote>
+Tip: keep the draft-by-default behaviour and review sends yourself. Treat <code>--confirm-send</code> as a
+deliberate, per-message decision rather than a default you switch on and forget.
+</blockquote>
+
+<h2 id="graph">When should you use Microsoft Graph instead?</h2>
+<p>
+This bridge is deliberately narrow. Reach for the <strong>Microsoft Graph API</strong> when you need any of the
+following, because COM automation can't provide them:
+</p>
+<ul>
+  <li><strong>Headless or server-side</strong> automation where no one is signed into Outlook interactively.</li>
+  <li><strong>Cross-platform</strong> support (Linux, macOS, containers).</li>
+  <li><strong>Multi-mailbox or non-Outlook</strong> accounts, or provider-agnostic email.</li>
+</ul>
+<p>
+For everything else — a local assistant on your own Windows box, with Outlook already open — the COM bridge is
+the shortest path from "I want Claude to handle my email" to it actually working.
+</p>
+
+<h2 id="faq">Frequently asked</h2>
+
+<h3>Can Claude read my Outlook email without OAuth or the Microsoft Graph API?</h3>
+<p>Yes, on Windows. The bridge drives the classic Outlook Desktop App through Windows COM automation, inheriting
+your already signed-in Outlook session — no Azure app registration, no OAuth flow, no cloud intermediary.</p>
+
+<h3>Is it safe to let an AI agent send email from my account?</h3>
+<p>The bridge is draft-by-default: <code>send</code>, <code>reply</code>, and <code>forward</code> save to Drafts
+unless you pass <code>--confirm-send</code>. Nothing leaves your outbox until you approve it, and Claude Code's
+scoped permission limits it to running only the bridge script.</p>
+
+<h3>Does this work with the new Outlook, Outlook on the web, or Mac Outlook?</h3>
+<p>No — it needs the classic Outlook Desktop App on Windows 10 or 11, because it uses Windows COM automation.
+For cross-platform or headless setups, use the Microsoft Graph API instead.</p>
+
+<h3>What does it cost?</h3>
+<p>Nothing. <code>claude-outlook-bridge</code> is open source under the MIT license. Its only dependency is
+<code>pywin32</code>.</p>
+
+<footer>
+  <p>This guide accompanies the open-source
+  <a href="https://github.com/ChiefStarKid/claude-outlook-bridge">claude-outlook-bridge</a> project by
+  Joseph Solomon. Questions or bugs: <a href="mailto:joseph@kainosis.com">joseph@kainosis.com</a> ·
+  <a href="https://github.com/ChiefStarKid/claude-outlook-bridge/issues">open an issue</a>.</p>
+  <p><a href="https://chiefstarkid.github.io/projects/">← Back to all projects</a></p>
+</footer>
+
+</body>
+</html>
