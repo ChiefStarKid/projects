@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>What Are Claude Code Skills? A Plain Explanation with Working Examples</title>
+<meta name="description" content="Claude Code skills explained: what a skill actually is, how it differs from an MCP server, how you invoke one, and two working open-source examples you can read and adapt.">
+<link rel="canonical" href="https://chiefstarkid.github.io/projects/what-are-claude-code-skills/">
+
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://chiefstarkid.github.io/projects/what-are-claude-code-skills/">
+<meta property="og:title" content="What Are Claude Code Skills? A Plain Explanation with Working Examples">
+<meta property="og:description" content="What a Claude Code skill actually is, how you invoke one, and two working open-source examples you can read and adapt.">
+<meta property="og:site_name" content="Joseph Solomon — Projects">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="What Are Claude Code Skills? A Plain Explanation with Working Examples">
+<meta name="twitter:description" content="What a Claude Code skill actually is, how you invoke one, and two working open-source examples you can read and adapt.">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "TechArticle",
+      "headline": "What are Claude Code skills? A plain explanation with working examples",
+      "description": "An explanation of what a Claude Code skill is, how it differs from an MCP server, how you invoke one, and two working open-source examples.",
+      "author": {
+        "@type": "Person",
+        "name": "Joseph Solomon",
+        "url": "https://chiefstarkid.github.io/projects/",
+        "sameAs": [
+          "https://github.com/ChiefStarKid",
+          "https://www.linkedin.com/in/joseph-solomon-%E6%88%B4%E4%BC%81%E5%BA%86-376156160/"
+        ]
+      },
+      "about": [
+        { "@type": "Thing", "name": "Claude Code" },
+        { "@type": "Thing", "name": "LLM agent skills" },
+        { "@type": "Thing", "name": "AI coding assistants" }
+      ]
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What is a Claude Code skill?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "A Claude Code skill is a reusable, packaged set of instructions — usually a Markdown file — that Claude Code reads and executes on demand. Instead of re-typing a multi-step workflow every time, you invoke the skill by name and Claude follows the saved procedure. Skills capture judgment and process, not just code."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How is a Claude Code skill different from an MCP server?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "An MCP server adds new tools — new capabilities Claude can call, like a database query or an API. A skill orchestrates the tools Claude already has into a repeatable workflow using natural-language instructions. MCP extends what Claude can do; a skill standardises how Claude does a recurring task. They are complementary, not competing."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How do you invoke a Claude Code skill?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "You type a slash command, such as /new-thread, or Claude invokes the matching skill automatically when your request fits what the skill covers. Custom-command skills are Markdown files placed in your .claude/commands/ folder; Claude reads the file and carries out its instructions."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Are there open-source examples of Claude Code skills?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. new-thread is a skill that hands a task off to a fresh parallel Claude session without dragging along the current context, and link-pitch is a skill for SEO link insertion and editorial outreach. Both are public on GitHub and built to be read, forked, and adapted."
+          }
+        }
+      ]
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "Projects", "item": "https://chiefstarkid.github.io/projects/" },
+        { "@type": "ListItem", "position": 2, "name": "What are Claude Code skills?", "item": "https://chiefstarkid.github.io/projects/what-are-claude-code-skills/" }
+      ]
+    }
+  ]
+}
+</script>
+
+<style>
+  :root { color-scheme: light dark; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; max-width: 780px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; line-height: 1.65; color: #1a1a1a; background: #fff; }
+  @media (prefers-color-scheme: dark) {
+    body { color: #e5e5e5; background: #0d1117; }
+    a { color: #58a6ff; }
+    code, pre { background: #161b22; } pre { border-color: #30363d; }
+    table, th, td { border-color: #30363d; } thead { background: #161b22; }
+    blockquote { border-color: #30363d; color: #b0b0b0; }
+    .crumbs, .meta { color: #8b949e; }
+  }
+  .crumbs { font-size: 0.85rem; color: #666; margin-bottom: 1.5rem; }
+  h1 { font-size: 1.7rem; line-height: 1.25; margin-bottom: 0.4rem; }
+  .meta { color: #666; font-size: 0.9rem; margin-top: 0; }
+  h2 { font-size: 1.25rem; margin-top: 2.4rem; border-bottom: 1px solid #d0d7de; padding-bottom: 0.3rem; }
+  h3 { font-size: 1.05rem; margin-top: 1.6rem; }
+  code { background: #f0f2f4; padding: 0.1rem 0.35rem; border-radius: 4px; font-family: "SFMono-Regular", Consolas, Menlo, monospace; font-size: 0.9em; }
+  pre { background: #f6f8fa; border: 1px solid #d0d7de; border-radius: 8px; padding: 0.9rem 1rem; overflow-x: auto; font-size: 0.86rem; line-height: 1.5; }
+  pre code { background: none; padding: 0; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.92rem; display: block; overflow-x: auto; }
+  th, td { border: 1px solid #d0d7de; padding: 0.5rem 0.7rem; text-align: left; vertical-align: top; }
+  thead { background: #f6f8fa; }
+  blockquote { border-left: 3px solid #d0d7de; margin: 1.2rem 0; padding: 0.2rem 0 0.2rem 1rem; color: #555; }
+  footer { margin-top: 3rem; font-size: 0.9rem; color: #666; border-top: 1px solid #d0d7de; padding-top: 1rem; }
+</style>
+</head>
+<body>
+
+<nav class="crumbs"><a href="https://chiefstarkid.github.io/projects/">← Joseph Solomon — Projects</a></nav>
+
+<h1>What are Claude Code skills? A plain explanation, with working examples</h1>
+<p class="meta">A practical explainer · updated 2026-07-15</p>
+
+<p>
+If you've seen people type things like <code>/new-thread</code> or <code>/code-review</code> into Claude Code
+and wondered what a "skill" actually <em>is</em> — this is the short, concrete answer. A Claude Code skill is a
+<strong>reusable, packaged set of instructions that Claude reads and executes on demand.</strong> Rather than
+re-explaining a multi-step workflow every time you need it, you save the procedure once and invoke it by name.
+</p>
+
+<h2 id="what">So what is a skill, really?</h2>
+<p>
+At its simplest, a skill is a <strong>Markdown file describing a task</strong> — the steps, the judgment calls,
+the output format — that Claude Code loads and carries out when you invoke it. The
+<a href="https://github.com/ChiefStarKid/new-thread">new-thread</a> skill puts it plainly: it's "a
+<code>.md</code> file that Claude reads and executes as a skill." There's no compiler, no plugin binary; the
+instructions <em>are</em> the program, and Claude is the interpreter.
+</p>
+<p>That means a skill is good at capturing things code alone can't:</p>
+<ul>
+  <li><strong>Process</strong> — the right order of operations for a recurring task.</li>
+  <li><strong>Judgment</strong> — what to check, when to stop, what "done" looks like.</li>
+  <li><strong>Voice and format</strong> — how the output should read, so it's consistent every time.</li>
+</ul>
+
+<h2 id="vs-mcp">How is a skill different from an MCP server?</h2>
+<p>
+This is the most common point of confusion, so it's worth stating clearly. They operate at different layers:
+</p>
+<table>
+  <thead><tr><th></th><th>MCP server</th><th>Skill</th></tr></thead>
+  <tbody>
+    <tr><td><strong>What it adds</strong></td><td>New <em>tools</em> — capabilities Claude didn't have (a database query, an API call, a device).</td><td>A repeatable <em>workflow</em> over the tools Claude already has.</td></tr>
+    <tr><td><strong>Made of</strong></td><td>Running code exposing a protocol.</td><td>Natural-language instructions in Markdown.</td></tr>
+    <tr><td><strong>Answers</strong></td><td>"What can Claude do?"</td><td>"How should Claude do this recurring task?"</td></tr>
+  </tbody>
+</table>
+<p>
+They're complementary. An MCP server <em>extends</em> what Claude can reach; a skill <em>standardises</em> how
+Claude handles a task you do over and over. Many real setups use both — tools from MCP, orchestrated by a skill.
+</p>
+
+<h2 id="invoke">How do you invoke one?</h2>
+<p>Two ways:</p>
+<ul>
+  <li><strong>By name</strong> — you type a slash command like <code>/new-thread</code>, and Claude runs that
+  skill's instructions.</li>
+  <li><strong>Automatically</strong> — when your request matches what a skill covers, Claude invokes it for you.</li>
+</ul>
+<p>
+For the custom-command style, setup is often just placing a Markdown file in your
+<code>.claude/commands/</code> folder. From <code>new-thread</code>'s own quick start:
+</p>
+<pre><code>1. Copy new-thread.md into C:\Users\&lt;you&gt;\.claude\commands\
+2. Type /new-thread [what you want it to do]
+3. Claude reads the file and executes it</code></pre>
+<p>No install script, no configuration beyond dropping the file in place.</p>
+
+<h2 id="examples">Two working examples you can read today</h2>
+
+<h3>1. new-thread — hand a task to a fresh parallel session</h3>
+<p>
+<a href="https://github.com/ChiefStarKid/new-thread">new-thread</a> solves a specific problem: you're deep in a
+long Claude Code session and a new, unrelated task appears. You don't want to derail your current thread, and you
+don't want the new one to inherit all your accumulated context. The skill reads your current session, extracts
+<em>only</em> the context the new task needs, and spins up a focused parallel session — you stay put; the offshoot
+runs on its own. It's a good example of a skill encoding <em>process</em> and <em>judgment</em>, not just commands.
+</p>
+
+<h3>2. link-pitch — research and write an SEO outreach pitch</h3>
+<p>
+<a href="https://github.com/ChiefStarKid/link-pitch">link-pitch</a> points at a client site and a target article,
+researches both, finds the keyword gaps the article leaves open, and produces a publisher-ready outreach email in
+your voice. It shows how a skill can capture a whole professional workflow — research, analysis, and a
+<em>voiced</em> deliverable — in a form you invoke with one command.
+</p>
+
+<h2 id="when">When should you write a skill?</h2>
+<p>Reach for a skill when a task is:</p>
+<ul>
+  <li><strong>Recurring</strong> — you do it often enough that re-explaining it is a tax.</li>
+  <li><strong>Multi-step with judgment</strong> — there's a right order and real decisions, not one command.</li>
+  <li><strong>Consistency-sensitive</strong> — you want the same process and output shape every time.</li>
+</ul>
+<p>
+If instead you need Claude to reach a system it currently <em>can't</em> — a new API, a local app, a database —
+that's a job for a tool (often an MCP server, or a thin bridge script). For the difference between those two, see
+<a href="https://chiefstarkid.github.io/projects/mcp-server-vs-bridge-desktop-automation/">MCP server vs. a direct
+bridge for desktop automation</a>.
+</p>
+
+<h2 id="faq">Frequently asked</h2>
+
+<h3>What is a Claude Code skill?</h3>
+<p>A reusable, packaged set of instructions — usually a Markdown file — that Claude Code reads and executes on
+demand, so you invoke a saved workflow by name instead of re-typing it.</p>
+
+<h3>How is a skill different from an MCP server?</h3>
+<p>An MCP server adds new tools (new capabilities); a skill orchestrates the tools Claude already has into a
+repeatable workflow. MCP extends what Claude can do; a skill standardises how it does a recurring task.</p>
+
+<h3>How do you invoke a Claude Code skill?</h3>
+<p>Type a slash command like <code>/new-thread</code>, or let Claude invoke the matching skill automatically.
+Custom-command skills are Markdown files in your <code>.claude/commands/</code> folder.</p>
+
+<h3>Are there open-source examples?</h3>
+<p>Yes — <a href="https://github.com/ChiefStarKid/new-thread">new-thread</a> (parallel-session handoff) and
+<a href="https://github.com/ChiefStarKid/link-pitch">link-pitch</a> (SEO outreach) are both public and built to
+be read and adapted.</p>
+
+<footer>
+  <p>Written by Joseph Solomon. More open-source Claude Code tools at
+  <a href="https://chiefstarkid.github.io/projects/">chiefstarkid.github.io/projects</a> ·
+  <a href="mailto:joseph@kainosis.com">joseph@kainosis.com</a></p>
+  <p><a href="https://chiefstarkid.github.io/projects/">← Back to all projects</a></p>
+</footer>
+
+</body>
+</html>

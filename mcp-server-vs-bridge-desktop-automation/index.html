@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MCP Server vs. a Direct Bridge for Desktop Automation: Which Do You Need?</title>
+<meta name="description" content="When to build an MCP server versus a thin direct bridge to let an LLM agent drive a local desktop app. A practical comparison with a real Windows Outlook example, and a decision checklist.">
+<link rel="canonical" href="https://chiefstarkid.github.io/projects/mcp-server-vs-bridge-desktop-automation/">
+
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://chiefstarkid.github.io/projects/mcp-server-vs-bridge-desktop-automation/">
+<meta property="og:title" content="MCP Server vs. a Direct Bridge for Desktop Automation">
+<meta property="og:description" content="When to build an MCP server versus a thin direct bridge to let an LLM agent drive a local desktop app — with a real Windows Outlook example.">
+<meta property="og:site_name" content="Joseph Solomon — Projects">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="MCP Server vs. a Direct Bridge for Desktop Automation">
+<meta name="twitter:description" content="When to build an MCP server versus a thin direct bridge to let an LLM agent drive a local desktop app.">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "TechArticle",
+      "headline": "MCP server vs. a direct bridge for desktop automation: which do you need?",
+      "description": "A practical comparison of building an MCP server versus a thin direct bridge to let an LLM agent drive a local desktop application, with a decision checklist.",
+      "author": {
+        "@type": "Person",
+        "name": "Joseph Solomon",
+        "url": "https://chiefstarkid.github.io/projects/",
+        "sameAs": [
+          "https://github.com/ChiefStarKid",
+          "https://www.linkedin.com/in/joseph-solomon-%E6%88%B4%E4%BC%81%E5%BA%86-376156160/"
+        ]
+      },
+      "about": [
+        { "@type": "Thing", "name": "Model Context Protocol" },
+        { "@type": "Thing", "name": "LLM agent tooling" },
+        { "@type": "Thing", "name": "desktop automation" }
+      ]
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Do I need an MCP server to connect an LLM agent to a desktop app?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Not always. If your agent (such as Claude Code) can already run shell commands, a thin bridge — a small script the agent calls that returns structured JSON — often does the job with far less setup. An MCP server is worth the extra work when you want a reusable, typed tool that many agents or teammates share, or richer capability negotiation."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What is the difference between an MCP server and a bridge script?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "An MCP server is a running process that exposes typed tools over the Model Context Protocol, discoverable and reusable across any MCP-aware client. A bridge script is a plain command-line program the agent invokes directly and reads the output of. The MCP server is more capable and more portable; the bridge is simpler and faster to stand up."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "When is a direct bridge the better choice?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "A direct bridge is better for a local assistant on your own machine, a single agent, and a narrow task where the app is already open — for example letting Claude drive Outlook Desktop on Windows. It trades portability and formal tool-typing for near-zero setup."
+          }
+        }
+      ]
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "Projects", "item": "https://chiefstarkid.github.io/projects/" },
+        { "@type": "ListItem", "position": 2, "name": "MCP server vs. a direct bridge", "item": "https://chiefstarkid.github.io/projects/mcp-server-vs-bridge-desktop-automation/" }
+      ]
+    }
+  ]
+}
+</script>
+
+<style>
+  :root { color-scheme: light dark; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; max-width: 780px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; line-height: 1.65; color: #1a1a1a; background: #fff; }
+  @media (prefers-color-scheme: dark) {
+    body { color: #e5e5e5; background: #0d1117; }
+    a { color: #58a6ff; }
+    code, pre { background: #161b22; } pre { border-color: #30363d; }
+    table, th, td { border-color: #30363d; } thead { background: #161b22; }
+    blockquote { border-color: #30363d; color: #b0b0b0; }
+    .crumbs, .meta { color: #8b949e; }
+  }
+  .crumbs { font-size: 0.85rem; color: #666; margin-bottom: 1.5rem; }
+  h1 { font-size: 1.7rem; line-height: 1.25; margin-bottom: 0.4rem; }
+  .meta { color: #666; font-size: 0.9rem; margin-top: 0; }
+  h2 { font-size: 1.25rem; margin-top: 2.4rem; border-bottom: 1px solid #d0d7de; padding-bottom: 0.3rem; }
+  h3 { font-size: 1.05rem; margin-top: 1.6rem; }
+  code { background: #f0f2f4; padding: 0.1rem 0.35rem; border-radius: 4px; font-family: "SFMono-Regular", Consolas, Menlo, monospace; font-size: 0.9em; }
+  pre { background: #f6f8fa; border: 1px solid #d0d7de; border-radius: 8px; padding: 0.9rem 1rem; overflow-x: auto; font-size: 0.86rem; line-height: 1.5; }
+  pre code { background: none; padding: 0; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.92rem; display: block; overflow-x: auto; }
+  th, td { border: 1px solid #d0d7de; padding: 0.5rem 0.7rem; text-align: left; vertical-align: top; }
+  thead { background: #f6f8fa; }
+  blockquote { border-left: 3px solid #d0d7de; margin: 1.2rem 0; padding: 0.2rem 0 0.2rem 1rem; color: #555; }
+  footer { margin-top: 3rem; font-size: 0.9rem; color: #666; border-top: 1px solid #d0d7de; padding-top: 1rem; }
+</style>
+</head>
+<body>
+
+<nav class="crumbs"><a href="https://chiefstarkid.github.io/projects/">← Joseph Solomon — Projects</a></nav>
+
+<h1>MCP server vs. a direct bridge for desktop automation: which do you actually need?</h1>
+<p class="meta">A practical comparison · updated 2026-07-15</p>
+
+<p>
+You want an LLM agent — Claude Code, say — to drive a local desktop application: read your email, control an
+app, query something on your own machine. The reflex answer in 2026 is "build an MCP server." Sometimes that's
+right. Often it's more machinery than the job needs. This is a practical guide to choosing, with a real Windows
+Outlook example to make it concrete.
+</p>
+
+<h2 id="definitions">Two ways to give an agent a new capability</h2>
+<p><strong>An MCP server</strong> is a running process that exposes <em>typed tools</em> over the Model Context
+Protocol. Any MCP-aware client can discover those tools and call them. It's the portable, reusable, "proper"
+integration — and it comes with real setup: a server to write, run, and keep alive; a protocol to speak; a
+lifecycle to manage.</p>
+<p><strong>A direct bridge</strong> is a plain command-line program the agent invokes and reads the output of.
+If your agent can already shell out — Claude Code can — then a small script that takes a command and returns
+<strong>structured JSON</strong> is enough for the agent to use it. No server, no protocol, no daemon.</p>
+
+<h2 id="compare">Side by side</h2>
+<table>
+  <thead><tr><th></th><th>MCP server</th><th>Direct bridge (script)</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Setup cost</strong></td><td>Higher — write, host, and run a server.</td><td>Low — a single script plus a permission to run it.</td></tr>
+    <tr><td><strong>Reusability</strong></td><td>High — any MCP client, any teammate.</td><td>Local — tied to an agent that can run commands.</td></tr>
+    <tr><td><strong>Tool typing / discovery</strong></td><td>Formal, typed, self-describing.</td><td>Informal — the agent reads JSON output.</td></tr>
+    <tr><td><strong>Best when</strong></td><td>Shared, long-lived, multi-agent, or cross-machine.</td><td>Local assistant, one agent, narrow task, app already open.</td></tr>
+    <tr><td><strong>Ongoing maintenance</strong></td><td>A process to keep running and updated.</td><td>Effectively none — it runs when called.</td></tr>
+  </tbody>
+</table>
+
+<h2 id="example">A concrete example: driving Outlook on Windows</h2>
+<p>
+Take a real case — letting Claude read and send Outlook email on your own Windows PC. You could build an MCP
+server around Microsoft Graph: an Azure app registration, OAuth, token refresh, a hosted process. Portable and
+powerful — and heavy for a tool you'll only ever use on the machine where Outlook is already open.
+</p>
+<p>
+The bridge approach skips all of it. <a href="https://github.com/ChiefStarKid/claude-outlook-bridge">claude-outlook-bridge</a>
+is a single Python script that drives the Outlook Desktop App through Windows COM automation and returns JSON.
+Claude calls it like any shell command:
+</p>
+<pre><code>python outlook_bridge.py list --pretty</code></pre>
+<p>
+Because Outlook is already signed in, there's no authentication to set up at all. The bridge's own author put the
+trade-off well: a thin script the agent calls, returning structured JSON, "turned out to be more reliable and
+simpler to maintain than any webhook or API approach" for this local use case. For the full walkthrough, see
+<a href="https://chiefstarkid.github.io/projects/claude-outlook-email-windows/">how to let Claude read and send
+your Outlook email on Windows</a>.
+</p>
+<blockquote>
+The point isn't that bridges beat MCP servers. It's that the "app is already open on my machine" case is exactly
+where a bridge's simplicity wins — and that case is more common than the reflex "build a server" suggests.
+</blockquote>
+
+<h2 id="checklist">A quick decision checklist</h2>
+<p><strong>Lean toward a direct bridge when:</strong></p>
+<ul>
+  <li>It's a local assistant on <em>your</em> machine, and the app is already running.</li>
+  <li>One agent uses it, and that agent can run shell commands.</li>
+  <li>The task is narrow and you want it working today.</li>
+</ul>
+<p><strong>Invest in an MCP server when:</strong></p>
+<ul>
+  <li>Multiple agents, teammates, or machines need the same capability.</li>
+  <li>You want formal, typed, discoverable tools rather than parsed output.</li>
+  <li>The integration is long-lived and worth maintaining as infrastructure.</li>
+</ul>
+
+<h2 id="faq">Frequently asked</h2>
+
+<h3>Do I need an MCP server to connect an LLM agent to a desktop app?</h3>
+<p>Not always. If your agent can run shell commands, a thin bridge that returns structured JSON often does the job
+with far less setup. Choose an MCP server when you want a reusable, typed tool shared across agents or teammates.</p>
+
+<h3>What's the difference between an MCP server and a bridge script?</h3>
+<p>An MCP server is a running process exposing typed tools over a protocol, reusable across clients. A bridge is a
+command-line program the agent invokes directly and reads the output of — simpler, but local and informal.</p>
+
+<h3>When is a direct bridge the better choice?</h3>
+<p>For a local assistant, a single agent, and a narrow task where the app is already open — for example driving
+Outlook Desktop on Windows. It trades portability for near-zero setup.</p>
+
+<footer>
+  <p>Written by Joseph Solomon. Related: the open-source
+  <a href="https://github.com/ChiefStarKid/claude-outlook-bridge">claude-outlook-bridge</a> and more tools at
+  <a href="https://chiefstarkid.github.io/projects/">chiefstarkid.github.io/projects</a> ·
+  <a href="mailto:joseph@kainosis.com">joseph@kainosis.com</a></p>
+  <p><a href="https://chiefstarkid.github.io/projects/">← Back to all projects</a></p>
+</footer>
+
+</body>
+</html>
